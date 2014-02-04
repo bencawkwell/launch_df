@@ -1,0 +1,57 @@
+#!/bin/bash
+
+usage()
+{
+cat << EOF
+usage: $0 options
+
+This script launches Dwarf Fortress but allows input paramters to set
+options normally needed to be set in the init.txt config file.
+
+USAGE:
+    launch_df [OPTION…] [SCRIPT…]
+
+OPTIONS:
+   -h      Show this message
+   -p      Print mode, can be ‘2D′ or ‘TEXT′
+   -s      Skip the intro
+
+EXAMPLE USAGE:
+   launch_df.sh -p TEXT -s df_linux/df
+EOF
+}
+
+INTRO="YES"
+PRINTMODE="2D"
+while getopts “:hp:s” OPTION
+do
+    case $OPTION in
+        h)
+            usage
+            exit 1
+            ;;
+        p)
+            PRINTMODE=$OPTARG
+            ;;
+        s)
+            INTRO="NO"
+            ;;
+        ?)
+            usage
+            exit
+            ;;
+    esac
+done
+
+shift $(( OPTIND - 1 ))
+DFSCRIPT=$1
+if [ "$DFSCRIPT" == "" ] ; then
+    usage
+    exit
+fi
+DFPATH=`dirname $DFSCRIPT`
+
+sed -i -r "s/^\[INTRO:.+\]/[INTRO:$INTRO]/" $DFPATH/data/init/init.txt
+sed -i -r "s/^\[PRINT_MODE:.+\]/[PRINT_MODE:$PRINTMODE]/" $DFPATH/data/init/init.txt
+
+$DFSCRIPT
