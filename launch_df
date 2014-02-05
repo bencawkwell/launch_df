@@ -13,6 +13,7 @@ USAGE:
 
 OPTIONS:
    -h      Show this message
+   -f      Fullscreen
    -p      Print mode, can be ‘2D′ or ‘TEXT′
    -s      Skip the intro
 
@@ -23,12 +24,16 @@ EOF
 
 INTRO="YES"
 PRINTMODE="2D"
-while getopts “:hp:s” OPTION
+WINDOWED="YES"
+while getopts “:hfp:s” OPTION
 do
     case $OPTION in
         h)
             usage
             exit 1
+            ;;
+        f)
+            WINDOWED="NO"
             ;;
         p)
             PRINTMODE=$OPTARG
@@ -53,5 +58,6 @@ DFPATH=`dirname $DFSCRIPT`
 
 sed -i -r "s/^\[INTRO:.+\]/[INTRO:$INTRO]/" $DFPATH/data/init/init.txt
 sed -i -r "s/^\[PRINT_MODE:.+\]/[PRINT_MODE:$PRINTMODE]/" $DFPATH/data/init/init.txt
+sed -i -r "s/^\[WINDOWED:.+\]/[WINDOWED:$WINDOWED]/" $DFPATH/data/init/init.txt
 
 $DFSCRIPT
