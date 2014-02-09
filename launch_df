@@ -16,16 +16,52 @@ OPTIONS:
    -f      Fullscreen
    -p      Print mode, can be ‘2D′ or ‘TEXT′
    -s      Skip the intro
+   -t      Takes a path to a tileset directory for which content will be copied over before launch.
+           This will also update the raws in any saved games.
 
 EXAMPLE USAGE:
-   launch_df.sh -p TEXT -s df_linux/df
+   launch_df.sh -p 2D -s -t myTilesets/Pheobus_34_11v01 df_linux/df
 EOF
+}
+
+backupCursesTilesetData()
+{
+    echo $1
+    if [ ! -e "$1/backup" ] ; then
+        echo "Creating backup of original tileset data"
+        mkdir "$1/backup"
+        mkdir "$1/backup/curses"
+        mkdir "$1/backup/curses/data"
+        cp -ar "$1/raw" "$1/backup/curses"
+        cp -ar "$1/data/art" "$1/backup/curses/data/"
+        cp -ar "$1/data/init" "$1/backup/curses/data/"
+        echo "Backup stored in $1/backup/curses"
+    fi
+}
+
+importTilesetFolder()
+{
+    DFPATH=$1
+    TILESETPATH=$2
+    cp -a $TILESETPATH/* $DFPATH/
+    if [ -d "$DFPATH/data/save" ] ; then
+        echo "Updating saved games"
+        for FILE in $DFPATH/data/save/* ; do
+            if [ -d "$FILE" -a "`basename ${FILE}`" != "current" ]; then
+                echo -n "Updating '$FILE'... "
+                rm -rf "$FILE/raw"
+                cp -a "$DFPATH/raw" "$FILE/raw"
+                echo "done."
+            fi
+        done
+    fi
 }
 
 INTRO="YES"
 PRINTMODE="2D"
+TILESETPATH=""
 WINDOWED="YES"
-while getopts “:hfp:s” OPTION
+while getopts “:hfp:st:” OPTION
 do
     case $OPTION in
         h)
@@ -41,6 +77,9 @@ do
         s)
             INTRO="NO"
             ;;
+        t)
+            TILESETPATH=$OPTARG
+            ;;
         ?)
             usage
             exit
@@ -55,6 +94,18 @@ if [ "$DFSCRIPT" == "" ] ; then
     exit
 fi
 DFPATH=`dirname $DFSCRIPT`
+
+if [ "$TILESETPATH" == "" ] ; then
+    if [ -e "$DFPATH/backup" ] ; then
+        rm -r "$DFPATH/raw"
+        rm -r "$DFPATH/data/art"
+        rm -r "$DFPATH/data/init"
+    fi
+    importTilesetFolder "$DFPATH" "$DFPATH/backup/curses"
+else
+    backupCursesTilesetData "$DFPATH"
+    importTilesetFolder "$DFPATH" "$TILESETPATH"
+fi
 
 sed -i -r "s/^\[INTRO:.+\]/[INTRO:$INTRO]/" $DFPATH/data/init/init.txt
 sed -i -r "s/^\[PRINT_MODE:.+\]/[PRINT_MODE:$PRINTMODE]/" $DFPATH/data/init/init.txt
