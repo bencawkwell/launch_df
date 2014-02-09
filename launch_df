@@ -100,16 +100,18 @@ if [ "$DFSCRIPT" == "" ] ; then
 fi
 DFPATH=`dirname $DFSCRIPT`
 
-if [ "$TILESETPATH" == "" ] ; then
-    if [ -e "$DFPATH/backup" ] ; then
-        rm -r "$DFPATH/raw"
-        rm -r "$DFPATH/data/art"
-        rm -r "$DFPATH/data/init"
+if [ "$PRINTMODE" != "TEXT" ] ; then
+    if [ "$TILESETPATH" == "" ] ; then
+        if [ -e "$DFPATH/backup" ] ; then
+            rm -r "$DFPATH/raw"
+            rm -r "$DFPATH/data/art"
+            rm -r "$DFPATH/data/init"
+        fi
+        importTilesetFolder "$DFPATH" "$DFPATH/backup/curses"
+    else
+        backupCursesTilesetData "$DFPATH"
+        importTilesetFolder "$DFPATH" "$TILESETPATH"
     fi
-    importTilesetFolder "$DFPATH" "$DFPATH/backup/curses"
-else
-    backupCursesTilesetData "$DFPATH"
-    importTilesetFolder "$DFPATH" "$TILESETPATH"
 fi
 
 sed -i -r "s/^\[INTRO:.+\]/[INTRO:$INTRO]/" $DFPATH/data/init/init.txt
