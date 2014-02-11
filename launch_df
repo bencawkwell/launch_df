@@ -106,8 +106,8 @@ if [ "$PRINTMODE" != "TEXT" ] ; then
             rm -r "$DFPATH/raw"
             rm -r "$DFPATH/data/art"
             rm -r "$DFPATH/data/init"
+            importTilesetFolder "$DFPATH" "$DFPATH/backup/curses"
         fi
-        importTilesetFolder "$DFPATH" "$DFPATH/backup/curses"
     else
         backupCursesTilesetData "$DFPATH"
         importTilesetFolder "$DFPATH" "$TILESETPATH"
