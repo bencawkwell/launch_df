@@ -13,10 +13,27 @@ USAGE:
 OPTIONS:
    -h, --help           Show this message
    -s, --skip-intro     Skip the intro
+   -u, --update-saves   If a new tile set has been added this wil update existing save folders
 
 EXAMPLE USAGE:
    dwarffortress --skip-intro
 EOF
+}
+
+updateSaves()
+{
+    DFPATH=$1
+    if [ -d "$DFPATH/data/save" ] ; then
+        echo "Updating saved games"
+        for FILE in $DFPATH/data/save/* ; do
+            if [ -d "$FILE" -a "`basename ${FILE}`" != "current" ]; then
+                echo -n "Updating '$FILE'... "
+                rm -rf "$FILE/raw"
+                cp -a "$DFPATH/raw" "$FILE/raw"
+                echo "done."
+            fi
+        done
+    fi
 }
 
 # Read configuration
@@ -38,13 +55,14 @@ done < /etc/dwarffortress.conf
 for arg in "$@"; do
   shift
   case "$arg" in
-    "--help")       set -- "$@" "-h" ;;
-    "--skip-intro") set -- "$@" "-s" ;;
-    *)              set -- "$@" "$arg"
+    "--help")           set -- "$@" "-h" ;;
+    "--skip-intro")     set -- "$@" "-s" ;;
+    "--update-saves")   set -- "$@" "-u" ;;
+    *)                  set -- "$@" "$arg"
   esac
 done
 # Handle options
-while getopts “:hs” OPTION
+while getopts “:hsu” OPTION
 do
     case $OPTION in
         h)
@@ -53,6 +71,9 @@ do
             ;;
         s)
             sed -i -r "s/^\[INTRO:.+\]/[INTRO:$INTRO]/" ${config[df_dir]}/data/init/init.txt
+            ;;
+        u)
+            updateSaves "${config[df_dir]}"
             ;;
         ?)
             usage

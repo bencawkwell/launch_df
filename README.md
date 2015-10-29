@@ -21,9 +21,12 @@ For example to skip the intro:
 
     dwarf-fortress --skip-intro
 
+Another useful feature is the option to update the raw directory in your saved games, something you typically need to do after switching tile sets:
+
+    dwarffortress --update-saves
+
 Todo
 ----
 
 * Add more settings to be modified using command line arguments.
-* Restore setting after df quits.
-* An argument to update existing saves with the raw directory from the df_linux directory (useful when a new tile set has been added).
+* Restore settings after df quits.
