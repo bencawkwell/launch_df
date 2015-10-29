@@ -1,10 +1,30 @@
 #!/bin/bash
+
+usage()
+{
+cat << EOF
+usage: $0 options
+
+This script launches Dwarf Fortress
+
+USAGE:
+    dwarffortress [OPTION…]
+
+OPTIONS:
+   -h, --help           Show this message
+   -s, --skip-intro     Skip the intro
+
+EXAMPLE USAGE:
+   dwarffortress --skip-intro
+EOF
+}
+
+# Read configuration
 typeset -A config # init array
 config=( # set default values in config array
     [df_dir]="/df_linux"
     [df_launcher]="df"
 )
-
 while read line
 do
     if echo $line | grep -F = &>/dev/null
@@ -13,5 +33,32 @@ do
         config[$varname]=$(echo "$line" | cut -d '=' -f 2-)
     fi
 done < /etc/dwarffortress.conf
+
+# Transform long options to short ones
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    "--help")       set -- "$@" "-h" ;;
+    "--skip-intro") set -- "$@" "-s" ;;
+    *)              set -- "$@" "$arg"
+  esac
+done
+# Handle options
+while getopts “:hs” OPTION
+do
+    case $OPTION in
+        h)
+            usage
+            exit 1
+            ;;
+        s)
+            sed -i -r "s/^\[INTRO:.+\]/[INTRO:$INTRO]/" ${config[df_dir]}/data/init/init.txt
+            ;;
+        ?)
+            usage
+            exit
+            ;;
+    esac
+done
 
 (cd ${config[df_dir]} && ./${config[df_launcher]})
