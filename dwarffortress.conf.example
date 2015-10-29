@@ -1,0 +1,5 @@
+# Directory to where dwarf fortress resides (absolute)
+df_dir=/df_linux
+
+# Name of the file to launch (could be dfhack for example)
+df_launcher=df
